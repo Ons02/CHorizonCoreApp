@@ -22,6 +22,14 @@ builder.Services.AddScoped<ForgotPassword>();
 
 var app = builder.Build();
 
+// Automatically apply database migrations on startup.
+// This is a common pattern for development and Docker environments.
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
+
 // Map the endpoints
 app.MapUserApi();
 app.MapProjectApi();

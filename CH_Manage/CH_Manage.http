@@ -1,6 +1,63 @@
-@CH_Manage_HostAddress = http://localhost:5187
-
-GET {{CH_Manage_HostAddress}}/weatherforecast/
-Accept: application/json
+@api_host = http://localhost:8080
+@user_id =
 
 ###
+# Create a new user
+# @name createUser
+POST {{api_host}}/api/users
+Content-Type: application/json
+
+{
+  "username": "orvilleTest",
+  "hashPassWord": "1111"
+}
+
+###
+# After creating a user, capture the ID from the response.
+# For example, if the response is {"id":"...","username":"..."}, you can set it manually.
+# Or use the client's features to capture it, e.g., in VS Code REST Client:
+# @user_id = {{createUser.response.body.$.id}}
+
+###
+# Get all users
+GET {{api_host}}/api/users
+
+###
+# Get a specific user by ID
+# Note: Manually replace 'your_user_id_here' with the ID from the create response if the variable doesn't work.
+GET {{api_host}}/api/users/{{user_id}}
+
+###
+# Update a user's username
+PUT {{api_host}}/api/users/{{user_id}}
+Content-Type: application/json
+
+{
+  "username": "testuser_updated",
+  "hashPassWord": ""
+}
+
+###
+# User Login - Successful
+POST {{api_host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser_updated",
+  "password": "1111"
+}
+
+###
+# User Login - Failed (Incorrect Password)
+POST {{api_host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "orville",
+  "password": "wrongpassword"
+}
+
+
+###
+# Delete the user
+DELETE {{api_host}}/api/users/{{user_id}}

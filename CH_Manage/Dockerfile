@@ -1,4 +1,5 @@
 ﻿# Stage 1: Build the application
+# Use the .NET 10 SDK image. Note: This image may not exist yet.
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
@@ -19,7 +20,8 @@ WORKDIR "/src/CH_Manage"
 RUN dotnet publish "CH_Manage.csproj" -c Release -o /app/publish
 
 # Stage 2: Create the final runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Use the .NET 10 ASP.NET runtime image. Note: This image may not exist yet.
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 
 # Copy the published output from the build stage.
