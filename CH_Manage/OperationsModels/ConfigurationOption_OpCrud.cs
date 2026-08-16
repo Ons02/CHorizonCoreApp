@@ -1,4 +1,3 @@
-using CH_Manage.DTO;
 using CH_Manage.EF_Configurations;
 using CH_Manage.Models;
 using Microsoft.EntityFrameworkCore;
@@ -19,13 +18,13 @@ namespace CH_Manage.OperationsModels
         }
 
         // Links an option to a client configuration
-        public async Task<ConfigurationOption> AddOptionToConfigurationAsync(ConfigurationOption_dto dto)
+        public async Task<ConfigurationOption> AddOptionToConfigurationAsync(Guid configurationId, Guid optionId)
         {
             var configOption = new ConfigurationOption
             {
                 Id = Guid.NewGuid(),
-                ConfigurationId = dto.ConfigurationId,
-                OptionId = dto.OptionId
+                ConfigurationId = configurationId,
+                OptionId = optionId
             };
 
             _context.ConfigurationOptions.Add(configOption);
