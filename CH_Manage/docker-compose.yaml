@@ -1,35 +1,31 @@
 services:
-  # The ASP.NET Core application service.
+  # Service de l'application ASP.NET Core
   app:
     build:
-      # The 'context' is the most important part. It tells Docker to use the
-      # parent directory as the root for the build. This is your solution root,
-      # where the .sln file is located.
-      context: ..
-      # This tells Docker where to find the Dockerfile relative to the context.
-      dockerfile: CH_Manage/Dockerfile
+      # Le contexte est le répertoire courant (où se trouve ce fichier)
+      context: .
+      dockerfile: Dockerfile
+    container_name: ch_manage_app
     ports:
       - "8080:8080"
-    environment:
-      # This connection string overrides the one in appsettings.json and
-      # points to the 'db' service defined below.
-      - ConnectionStrings__DefaultConnection=Host=db;Database=ch_manage_db;Username=postgres;Password=password
     depends_on:
-      # This ensures the database container starts before the application container.
-      - db
-
-  # The PostgreSQL database service.
-  db:
-    image: postgres:latest
+      - postgres
     environment:
-      - POSTGRES_DB=ch_manage_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
+      # Chaîne de connexion vers le service PostgreSQL
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=ch_manage_db;Username=postgres;Password=password"
+
+  # Service de la base de données PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: ch_manage_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ch_manage_db
     ports:
       - "5432:5432"
     volumes:
-      # This named volume ensures your database data is saved even if the
-      # container is removed.
       - postgres_data:/var/lib/postgresql/data
 
 volumes:

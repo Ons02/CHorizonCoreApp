@@ -1,34 +1,29 @@
-﻿# Stage 1: Build the application
-# Use the .NET 10 SDK image. Note: This image may not exist yet.
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-WORKDIR /src
-
-# Copy the solution and project files from the build context (solution root).
-COPY CH_Manage.sln .
-COPY CH_Manage/CH_Manage.csproj CH_Manage/
-
-# Restore dependencies for the entire solution.
-RUN dotnet restore CH_Manage.sln
-
-# Copy the rest of the source code.
-COPY . .
-
-# Set the working directory to the project folder.
-WORKDIR "/src/CH_Manage"
-
-# Publish the application.
-RUN dotnet publish "CH_Manage.csproj" -c Release -o /app/publish
-
-# Stage 2: Create the final runtime image
-# Use the .NET 10 ASP.NET runtime image. Note: This image may not exist yet.
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+﻿# Étape 1: Image de base pour l'exécution
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
-
-# Copy the published output from the build stage.
-COPY --from=build /app/publish .
-
-# Expose port 8080.
 EXPOSE 8080
 
-# Define the container's entry point.
+# Étape 2: Image pour la compilation (build)
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+# Copier le fichier .csproj et restaurer les dépendances
+COPY ["CH_Manage.csproj", "./"]
+RUN dotnet restore "CH_Manage.csproj"
+
+# Copier tout le reste du code source
+COPY . .
+WORKDIR "/src"
+RUN dotnet build "CH_Manage.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+# Étape 3: Image pour la publication
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "CH_Manage.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# Étape 4: Image finale, légère pour la production
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "CH_Manage.dll"]
